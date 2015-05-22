@@ -33,6 +33,11 @@ void MemoryManager::ShutDown()
 	delete memoryManager;
 }
 
+void MemoryManager::SetAllocatorUsedToDoubleLinearAllocator()
+{
+	usedAllocator = doubleEndedLinearAllocator;
+}
+
 MemoryManager *MemoryManager::Get()
 {
 	return memoryManager;
@@ -40,25 +45,35 @@ MemoryManager *MemoryManager::Get()
 
 DoubleEndedLinearAllocator &MemoryManager::GetDoubleEndedLinearAllocator()
 {
-	return *linearAllocator;
+	return *doubleEndedLinearAllocator;
 }
 
 void MemoryManager::CreateDoubleEndedLinearAllocator()
 {
-	linearAllocator = new DoubleEndedLinearAllocator(MEM_SIZE, memoryLinearAllocator);
+	doubleEndedLinearAllocator = new DoubleEndedLinearAllocator(MEM_SIZE, memoryLinearAllocator);
 }
 
 void MemoryManager::DestroyDoubleEndedLinearAllocator()
 {
-	delete linearAllocator;
+	delete doubleEndedLinearAllocator;
 }
 
 void *MemoryManager::AllocateDoubleEndedLinearAllocator(u32 sizeBytes, u8 alignment)
 {
-	return linearAllocator->Allocate(sizeBytes, alignment);
+	return doubleEndedLinearAllocator->Allocate(sizeBytes, alignment);
 }
 
 void MemoryManager::ClearDoubleEndedLinearAllocator()
 {
-	linearAllocator->Clear();
+	doubleEndedLinearAllocator->Clear();
+}
+
+void MemoryManager::SwitchToBottom()
+{
+	doubleEndedLinearAllocator->SwitchToBottom();
+}
+
+void MemoryManager::SwitchToTop()
+{
+	doubleEndedLinearAllocator->SwitchToTop();
 }

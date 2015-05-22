@@ -15,18 +15,18 @@ int main()
 {
 
 	memoryManager.StartUp();
-
+	memoryManager.Get()->SetAllocatorUsedToDoubleLinearAllocator();
 	for (int i = 0; i < MAX_ARRAYSIZE; i++)
 	{
 		if(i % 2 == 0)
 		{
-			memoryManager.Get()->GetDoubleEndedLinearAllocator().SwitchToBottom();
-			vehicles[i] = New<Car>(memoryManager.Get()->GetDoubleEndedLinearAllocator());
+			memoryManager.Get()->SwitchToBottom();
+			vehicles[i] = memoryManager.Get()->New<Car>();
 		}
 		else
 		{
-			memoryManager.Get()->GetDoubleEndedLinearAllocator().SwitchToTop();
-			vehicles[i] = New<Truck>(memoryManager.Get()->GetDoubleEndedLinearAllocator());
+			memoryManager.Get()->SwitchToTop();
+			vehicles[i] = memoryManager.Get()->New<Truck>();
 		}
 	}
 
@@ -40,7 +40,7 @@ int main()
 
 void Update()
 {
-	uint iterations = 0;
+	unsigned int iterations = 0;
 	while(iterations < 100)
 	{
 		iterations++;

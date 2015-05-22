@@ -11,15 +11,7 @@
 
 template<class T> T *New(Allocator &allocator)
 {
-
 	return  new(allocator.Allocate(sizeof(T), alignof(T)))T;
 }
-
-template<class T> void Delete(Allocator &allocator, T &object)
-{
-	object.~T();
-
-}
-
 
 #endif //ALLOCATORS_ALLOCATIONSCHEMAS_H
