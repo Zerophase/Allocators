@@ -9,8 +9,10 @@
 #include "Types.h"
 #include "DoubleEndedLinearAllocator.h"
 
+#define KB(n) (n*1024)
+#define MB(n) (KB(n)*1204)
 
-#define MEM_SIZE 262144
+#define MEM_SIZE KB(64)
 
 class MemoryManager : private Singleton<MemoryManager>
 {
@@ -27,11 +29,11 @@ private:
 public:
 	template<class T> T *New()
 	{
-		return  new(usedAllocator->Allocate(sizeof(T), alignof(T)))T;
+		return new(usedAllocator->Allocate(sizeof(T), 0))T;
 	}
 
 	MemoryManager();
-	~MemoryManager();
+	virtual ~MemoryManager();
 
 
 	void SetAllocatorUsedToDoubleLinearAllocator();

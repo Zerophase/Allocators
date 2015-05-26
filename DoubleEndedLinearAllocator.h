@@ -33,6 +33,8 @@ private:
 	void *positionAssignedTo;
 	void *midAddress;
 
+	bool isTop;
+
 	void (DoubleEndedLinearAllocator::*allocateAt)(uptr alignedAddress, u32 size);
 	void allocateTop(uptr alignedAddress, u32 size);
 	void allocateBottom(uptr alignedAddress, u32 size);

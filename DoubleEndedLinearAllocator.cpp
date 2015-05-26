@@ -12,7 +12,7 @@ DoubleEndedLinearAllocator::DoubleEndedLinearAllocator(u32 sizeBytes, void *star
 {
 	assert(size > 0);
 	marker = size / 2;
-	currentPositionTop = PointerMath::Add(currentPositionBottom, size);
+	currentPositionTop = PointerMath::Add(currentPositionBottom, size - 1);
 	midAddress = PointerMath::Add(currentPositionBottom, marker);
 	SwitchToBottom();
 }
@@ -33,13 +33,22 @@ void *DoubleEndedLinearAllocator::Allocate(u32 size, u8 alignment)
 
 	assert(size != 0);
 
-	u8 adjustment = PointerMath::AlignForwardAdjustment(positionAssignedTo, alignment);
+	u8 adjustment;
+	if( isTop )
+		adjustment = PointerMath::AlignBackwardAdjustment(positionAssignedTo, alignment);
+	else
+		adjustment = PointerMath::AlignForwardAdjustment( positionAssignedTo, alignment );
 
 	if((usedMemory + adjustment + size) > this->size)
 		return nullptr;
 	assert(currentPositionBottom < midAddress);
 
-	uptr alignedAddress = (uptr) positionAssignedTo + adjustment;
+	uptr alignedAddress;
+	if( isTop )
+		alignedAddress = (uptr)positionAssignedTo - adjustment - size;
+	else
+		alignedAddress = (uptr)positionAssignedTo + adjustment;
+
 	(this->*allocateAt)(alignedAddress, size);
 	//allocateBottom(alignedAddress, size);
 	usedMemory += size + adjustment;
@@ -63,24 +72,26 @@ void DoubleEndedLinearAllocator::Clear()
 	currentPositionBottom = start;
 }
 
-void DoubleEndedLinearAllocator::allocateTop(uptr alignedAddress, u32 size)
+void DoubleEndedLinearAllocator::allocateTop(uptr alignedAddress, u32 usedBytes)
 {
-	currentPositionTop = (void*) (alignedAddress - size);
+	currentPositionTop = (void *)alignedAddress;
 }
 
-void DoubleEndedLinearAllocator::allocateBottom(uptr alignedAddress, u32 size)
+void DoubleEndedLinearAllocator::allocateBottom( uptr alignedAddress, u32 usedBytes )
 {
-	currentPositionBottom = (void*) (alignedAddress + size);
+	currentPositionBottom = (void*)(alignedAddress + usedBytes);
 }
 
 void DoubleEndedLinearAllocator::SwitchToTop()
 {
+	isTop = true;
 	positionAssignedTo = currentPositionTop;
 	DoubleEndedLinearAllocator::allocateAt = &DoubleEndedLinearAllocator::allocateTop;
 }
 
 void DoubleEndedLinearAllocator::SwitchToBottom()
 {
+	isTop = false;
 	positionAssignedTo = currentPositionBottom;
 	DoubleEndedLinearAllocator::allocateAt = &DoubleEndedLinearAllocator::allocateBottom;
 }

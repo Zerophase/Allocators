@@ -15,18 +15,28 @@ namespace PointerMath
 		return (void *) (reinterpret_cast<uptr>(p) + x);
 	}
 
-	inline void *AlignForward(void *address, u8 alignment)
-	{
-		return (void *) ((reinterpret_cast<uptr>(address) + static_cast<uptr>(alignment - 1))
-		& static_cast<uptr>(~(alignment - 1)));
-	}
-
 	inline u8 AlignForwardAdjustment(const void *address, u8 alignment)
 	{
-		u8 adjustment = alignment - (reinterpret_cast<uptr>(address) & static_cast<uptr>(alignment - 1));
-		if(adjustment == alignment)
+		if( alignment <= 1 )
 			return 0;
-		return adjustment;
+
+		u8 adjustment = 0;
+		std::uintptr_t ptr = (std::uintptr_t)address;
+		return alignment - (ptr % alignment);
+	}
+
+	inline void *AlignForward( void *address, u8 alignment )
+	{
+		return (u8 *)address + AlignForwardAdjustment( address, alignment );
+	}
+
+	inline u8 AlignBackwardAdjustment( const void * address, u8 alignment )
+	{
+		if( alignment <= 1 )
+			return 0;
+
+		std::uintptr_t ptr = (std::uintptr_t)address;
+		return ptr % alignment;
 	}
 }
 
